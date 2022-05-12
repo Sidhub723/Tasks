@@ -2,7 +2,6 @@ Dockerisation of a MERN stack movie application!
 
 
 Prerequisites:
-
 Have both Docker and Docker Compose on your system
 
 To build the contents of the repo:
