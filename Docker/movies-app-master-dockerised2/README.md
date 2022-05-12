@@ -1,45 +1,30 @@
-# movies-app
+Dockerisation of a MERN stack movie application!
 
-# Introduction
 
-This repository is the result of the tutorial to develop your first MERN application and you can find it [here](https://medium.com/@samarony.barros/how-to-create-your-first-mern-mongodb-express-js-react-js-and-node-js-stack-7e8b20463e66)
+Prerequisites:
+Have both Docker and Docker Compose on your system
 
-## What you should install?
+To build the contents of the repo:
+1.Download/clone the repository
+2.On a command line interface enter the following command:
+	"docker compose up"
 
-For this project, I decided to use the MERN (MongoDB, Express.js, React.js, and Node.js) technology.
-![mern](https://miro.medium.com/max/678/1*dqvlaszRLvoPmARpOlLN9A.png)
+This command will build the necessary images which contain our application and then create the different containers based on those images!
+Note: If there are privilege issues then use sudo
 
-Firstly, you should install
+To test out the movie application, we can go to port 3000 on localhost using a web browser and if all went well, the application should be running! 
 
--   [Mongo](https://www.mongodb.com/) 4.0.4+
--   [ExpressJS](https://expressjs.com/) 4.16.3+
--   [ReactJS](https://reactjs.org/) 16.5.0+
--   [Node](https://nodejs.org/en/) 11.4.0+ (It's recommended to use 10.15.1 LTS)
 
-## Download
+Behind the scenes?
+How was this MERN application containerised used Docker?
+One could simply run the docker command with its various tags and run the apllications in an interconnected manner. But it is far far simpler to do it using docker compose.
 
-You can download the folder on my [GitHub](https://github.com/samaronybarros/) or you can do this directly on [this link](https://github.com/samaronybarros/movies-app).
+A docker file was added to both the client side and server side of the application. This file contains instructions for docker on the specifications(such as working directory,networks,ports and volumes) while creating the container. 	
 
-If you have git installed on your PC, you just need do as follow:
+To create and run both the containers in an interconnected manner, we create a Docker compose file which contains details about services and their specifications.
+The docker compose module will run all these services(aka containers) together and create a interconnected multi container ready to use application that is portable.
+In our current example, the three containers formed are: frontclient,server, mongodb. 
 
-```
-$ git clone https://github.com/samaronybarros/movies-app.git
-```
 
-## Configuring App
 
-If you have all the prerequisites installed you should verify if your MongoDB is up.
 
-```
-$ cd movies-app
-$ cd server
-$ yarn install
-$ nodemon index.js
-```
-
-```
-$ cd movies-app
-$ cd client
-$ yarn install
-$ yarn start
-```

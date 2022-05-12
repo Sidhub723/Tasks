@@ -47,10 +47,18 @@ volumes:
 
 # We choose to run the latest version of docker compose - version 3
 # Each of the different docker containers we want to create when we run docker compose is called a service
-# Ehe build command will build the image of the container
-# Ee specify the required ports for each container. The freshly created docker container will listen on its port 3000, and any data coming to port 3000 on localhost will be redirected to it
+# The build command will build the image of the container based on the dockerfile inside the specified directory
+# We specify the required ports for each container. The freshly created docker container will listen on its port 3000, and any data coming to port 3000 on localhost will be redirected to it
 # Different services are discoverable at a hostname which is the same as the container name. The mongodb index.js file tells us that it connects to a localhost name of "mongodb" and that is what we wil name our Mongo service
-# /data/db is the default location where mongodb stores its data
+# Services we will use are - frontclient,server and mongodb
+
+# Since containers are tiny isolated instances spun up by docker, if we kill a container, all the data in it will also be destroyed
+# This is not at all desirable for databases
+# To enable the data to persist over various instances of the containers, the data stored in the /data/db directory is also stored in a 'volume' which is present on the local machine
+# A volume enables data to be stored outside of the container and will naturally persist even if the container is killed
+# If the same container is restarted using the docker compose up command, the volume argument ensured that the newly created container will have all the data stored on the local machine
+# Docker usually stores the 'volume' data on the /var/lib directory on localhost
+
 
 
 
