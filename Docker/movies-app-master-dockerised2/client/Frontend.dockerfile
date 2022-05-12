@@ -1,7 +1,7 @@
 FROM node:18-slim
 WORKDIR /usr/src/app
-COPY ./package.json /usr/src/app
-COPY ./yarn.lock /usr/src/app
+COPY ./package.json ./
+COPY ./yarn.lock ./
 RUN yarn install
 RUN npm install
 COPY . /usr/src/app/
