@@ -1,0 +1,55 @@
+version : "3"
+services : 
+  frontclient:
+    build: Frontend
+    stdin_open: true
+    restart: always
+    depends_on:
+      -server
+    #image: "name"
+    ports:
+      - "4000:3000"
+    networks:
+      - "internalntwrk"
+
+  server:
+    restart: always
+    build: server
+    image: "name of the api server image"
+    ports:
+      - "3000:3000"
+    networks:
+      - "internalntwrk"
+
+  mongodb:
+    #image: "database"
+    image: mongo:4.2.0
+    ports:
+      - "//127.0.0.1:27017:27017"
+    networks:
+      - "internalntwrk"
+    volumes:
+      -mongo-data:/data/db
+
+networks:
+  internalntwrk:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
+    
+
+# WE choose to run the latest version of docker compose - version 3
+# each of the different docker containers we want to create when we run docker compose is called a service
+# the build command will build the image of the container
+# we specify the ports. The freshly created docker container will listen on its port 3000, and any data coming to our port 4000 will be redirected to it
+# Different services are discoverable at a hostname which is the same as the container name. The mongodb index.js file tells us that it connects to a localhost name of "mongodb" and that is what we wil name our Mongo service
+
+
+
+
+
+
+
+
