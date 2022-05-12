@@ -2,9 +2,11 @@ Dockerisation of a MERN stack movie application!
 
 
 Prerequisites:
+
 Have both Docker and Docker Compose on your system
 
 To build the contents of the repo:
+
 1.Download/clone the repository
 2.On a command line interface enter the following command:
 	"docker compose up"
@@ -16,6 +18,7 @@ To test out the movie application, we can go to port 3000 on localhost using a w
 
 
 Behind the scenes?
+
 How was this MERN application containerised used Docker?
 One could simply run the docker command with its various tags and run the apllications in an interconnected manner. But it is far far simpler to do it using docker compose.
 
