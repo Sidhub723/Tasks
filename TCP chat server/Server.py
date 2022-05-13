@@ -8,6 +8,7 @@ coldict = {
 'CBOLD'     : '\33[1m',
 'CITALIC'   : '\33[3m',
 'CURL'      : '\33[4m',
+'CSTRIKETHROUGH' : '\33[9m',
 'CBLINK'    : '\33[5m',
 'CBLINK2'   : '\33[6m',
 'CSELECTED' : '\33[7m',
@@ -44,59 +45,84 @@ coldict = {
 'CBEIGEBG2'  : '\33[106m',
 'CWHITEBG2'  : '\33[107m' }
 
+from multiprocessing.connection import Client
 import socket
 import sys
 import time
 import threading
-import pprint
 
-serverip = "" # some server ip address
-serverport = 5555
-count = 0
+
+
 
 class server():
+
+    global serverip
+    global serverport
+    global count
+    global locations
+    global serversock
+    serverip = "127.0.0.1" # some server ip address
+    serverport = 12345
+    count = 0
+    locations = []
+
     def __init__(self):
         self.clients = []
+        #self.locations = []
+
+
+    serversock = socket.socket()
+    serversock.bind((serverip,serverport))   # BINDING the socket to the ip of the server itself and a port on it so that all incoming connection recieved by the socket are redirected to the server itself
+    serversock.listen(30)  # the socket is now listening on a port on the ip of the server
+    print("Server is now active and listening!")
 
     
     def initialiser(self):
-        try:
-            serversock = socket.socket()
-            serversock.bind((serverip,serverport))   # BINDING the socket to the ip of the server itself and a port on it so that all incoming connection recieved by the socket are redirected to the server itself
-            serversock.listen(30)  # the socket is now listening on a port on the ip of the server
 
-            while True:
-                clisock,addr = serversock.accept()  # accepting any socket connections while the server socket is listening
-                a = input("A connection has arrived from "+ addr[0]+ " via port "+addr[1] +" \n Do you want to accept it?? Y/N")
-                if a == 'N' | a == 'n' :
-                    clisock.close()
+        global serverip
+        global serverport
+        global count
+        global locations
+        global serversock
 
-                elif a =='y' | a == 'Y' :
+        #try:
+        
 
-                    count += 1
-                    print("Client has joined. IP : "+addr[0] + " , and via port : "+addr[1]+ " at time : "+time.strftime("%a, %d %b %Y %H:%M:%S" + " . \n")) # visible to the person running server
-                    print(count + " clients currently online")
-                    self.broadcaster(str("User has joined room! Total online users are "+count))  # message broadcasted to all other active users
-                    self.clients.append(clisock)
-                    threading.Thread(target = self.clienthandler(),args = (clisock,)).start()
-                    
-                else :
-                    print("Wrong input :(")
+        while True:
+            clisock,addr = serversock.accept()  # accepting any socket connections while the server socket is listening
+            a = input("A connection has arrived from "+ str(addr[0])+ " via port "+str(addr[1]) +" \n Do you want to accept it?? Y/N")
+            if (a == 'N') | (a == 'n') :
+                clisock.close()
+                break
+
+            elif (a =='y') | (a == 'Y') :
+
+                count += 1
+                print("Client has joined. IP : "+str(addr[0]) + " , and via port : "+ str(addr[1])+ " at time : "+time.strftime("%a, %d %b %Y %H:%M:%S" + " . \n")) # visible to the person running server
+                print(str(count) + " clients currently online")
+                clisock.send('Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!'.encode("utf-8"))
+                self.broadcaster("User has joined room! Total online users are "+str(count))  # message broadcasted to all other active users
+                self.clients.append(clisock)
+                #self.locations.append([addr[0],addr[1],count])
+                locations.append([addr[0],addr[1],count])
+                thread = threading.Thread(target = self.clienthandler, args = (clisock,)).start()
+                
+                       
+            else :
+                print("Wrong input :(")
 
                 #inp = input("Enter commands if any. If nothing then just enter 'N' ")
                 #if inp == "/leave":
-                #    iprem = input("Enter the IP adress and port to be removed as a tuple")
+                #    iprem = input("Enter the IP adress and port to be removed as a list")
+                # input will be ["123,23,43,22","12345"]
+
                     
 
-                
-
-
-
             #serversock.close()
-        except socket.error as txt:
+        '''except socket.error as txt:
             print("Could not start server thread :(")
             time.sleep(4)
-            sys.exit()
+            sys.exit()  '''
 
 
 
@@ -107,21 +133,35 @@ class server():
                 c.send(message.encode("utf-8"))
 
             except socket.error as txt :
-                c.send(b'The message failed to send :( \n Try to send it again or close and reopen your connection! ')
+                c.send('The message failed to send :( \n Try to send it again or close and reopen your connection!'.encode("utf-8"))
 
         
 
 
-    def clienthandler(self,ClientsSocket):
-        global col
-        ClientsSocket.send(b'Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!')
-
+    def clienthandler(self,ClientsSocket):                  #clisock is sent as ClientsSocket
+        
+        global serverip
+        global serverport
+        global count
+        global locations
+        #ClientsSocket.send('Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!'.encode("utf-8"))
+        print("Clienthandler is run, from outsude while")
         while True :
-            data = ClientsSocket.recv(1024)
+            #try:
+            print("clienthandler has run from inside while")
+            data = ClientsSocket.recv(1024).decode("utf-8")
             #if not data :
             #    break
+            print("clienthadnler had recieved data")
             if str(data) == '/leave':   # /leave is the keyword for the client to close his connection
-                break 
+                index = self.clients.index(ClientsSocket)
+                details = locations[index]                  #array containing ip and port
+                ClientsSocket.send("You will be removed in 5 seconds...".encode("utf-8"))
+                time.sleep(5)
+
+
+                pass
+                    
             
             #formatting the data here as per the task!
             coltype = ''
@@ -136,8 +176,12 @@ class server():
                 data = coldict[coltype] + str(data) + coldict('CEND')
 
             if "/leave" in str(data):
-                self.broadcaster("A user has left")
+                #self.broadcaster("A user has left")
+                #self.locations.remove(self.clients.index(ClientsSocket))
+                self.broadcaster("User from ip: "+ str(locations[index][0]) +" and port : " + str(locations[index][2]) + " has left")
+                del self.locations[self.clients.index(ClientsSocket)]       
                 self.clients.remove(ClientsSocket)
+                
                 count -= 1
                 ClientsSocket.close()
 
@@ -148,24 +192,42 @@ class server():
             if str(data).count("**") == 2 : #wont work if there are multiple such bold text aesterisks 
                 start = str(data).index("**")
                 end = str(data).index("**",start+1)
-                data = coldict['CBOLD'] + str(data) + coldict('CEND')
+                #data = coldict['CBOLD'] + str(data) + coldict['CEND']
+                data = str(data)[0:start] + coldict['CBOLD'] + str(data)[start:end+1] + coldict['CEND']
+
+            if str(data).count("__") == 2:
+                start = str(data).index("__")
+                end = str(data).index("__",start+1)
+                #data = coldict['CITALIC'] + str(data) + coldict['CEND']
+                data = str(data)[0:start] + coldict['CITALIC'] + str(data)[start:end+1] + coldict['CEND']
+
+            if str(data).count("~~") == 2:
+                start = str(data).index("~~")
+                end = str(data).index("~~",start+1)
+                #data = coldict['CSTRIKETHROUGH'] + str(data)
+                data = str(data)[0:start] + coldict['CSTRIKETHROUGH'] + str(data)[start:end+1] + coldict['CEND']
+        
+            '''except:
+
+                index = self.clients.index(ClientsSocket)
+                self.broadcaster("User from ip: "+ str(locations[index][0]) +" and port : " + str(locations[index][2]) + " has left")
+                self.clients.remove(ClientsSocket)
+                del locations[index]
+                count -= 1
+                ClientsSocket.close()
+                #self.broadcaster("A user has left the chat")'''
 
 
 
+            for client in self.clients:
+                client.send(data.encode("utf-8"))
 
-
-
-
-            for client in self.clients.values():
-                client.send(data)
-
-        self.clients.remove(ClientsSocket) # removes from list of active clients
+        '''self.clients.remove(ClientsSocket) # removes from list of active clients
         count -= 1
-        ClientsSocket.close() # also closes the clients connection
+        ClientsSocket.close() # also closes the clients connection'''
 
 
 if __name__ == "__main__" :
     obj = server()
     threading.Thread(target = obj.initialiser).start()
-
 
