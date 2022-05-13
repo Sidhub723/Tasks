@@ -15,7 +15,7 @@ global host
 global port 
 global clientsock
 global connected
-host = '127.0.0.1' #
+host = '127.0.0.1'  # connecting to localhost
 port = 12345
 connected = False
 
@@ -23,7 +23,7 @@ def connector():
     global host,port,clientsock,connected
     try:
         
-        clientsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # AF_INET ensures that the communication occurs through the internet and SOCK_STREAM ensures that is happens through TCP
         clientsock = socket.create_connection((host,port))    # client creates a connection with host,port of server. client does not do 'bind' but does 'connect' with a port on the host
         print("You are being connected...")
         connected = True
@@ -33,7 +33,7 @@ def connector():
 
     while connected == True :
         try:
-            chats = clientsock.recv(1024).decode("utf-8")
+            chats = clientsock.recv(1024).decode("utf-8")       #receiving data from the server through the socket
             #chattxt = json.loads(chats)
             if "Welcome to the chat" in chats :
                 print("Messages will be displayed now : \n")
@@ -63,8 +63,8 @@ def messaging():
             sys.exit()
 
 
-connectorThread = threading.Thread(target = connector).start()
-messagingThread = threading.Thread(target = messaging).start()
+connectorThread = threading.Thread(target = connector).start()      #creating and starting the thread for the connection function so that multiple clients(and sockets) can be created on the same system
+messagingThread = threading.Thread(target = messaging).start()      #creating and starting the thread for the messaging function to continuously be able to send and receive data
 
 
 

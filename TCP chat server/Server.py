@@ -1,7 +1,7 @@
 ###############################Server ##########################
 
 global coldict 
-#colour data as well as bold, italics etc!
+#colour data as well as bold, italics etc! It is a Ctype terminal formatting code
 
 coldict = {
 'CEND'      : '\33[0m',
@@ -63,17 +63,17 @@ class server():
     global serversock
     serverip = "127.0.0.1" # some server ip address
     serverport = 12345
-    count = 0
-    locations = []
+    count = 0               #counts number of active users
+    locations = []          #stores the location of the user as (ip,port)
 
     def __init__(self):
         self.clients = []
         #self.locations = []
 
 
-    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      #AF_INET ensures the sockets communicate through the internet and SOCK_STREAM ensures that the communication is according to the TCP protocol
     serversock.bind((serverip,serverport))   # BINDING the socket to the ip of the server itself and a port on it so that all incoming connection recieved by the socket are redirected to the server itself
-    serversock.listen(30)  # the socket is now listening on a port on the ip of the server
+    serversock.listen(30)               # the socket is now listening on a port on the ip of the server
     print("Server is now active and listening!")
 
     
@@ -86,13 +86,12 @@ class server():
         global serversock
 
         #try:
-        
-
         while True:
-            clisock,addr = serversock.accept()  # accepting any socket connections while the server socket is listening
+            clisock,addr = serversock.accept()       # accepting any socket connections while the server socket is listening
             a = input("A connection has arrived from "+ str(addr[0])+ " via port "+str(addr[1]) +" \n Do you want to accept it?? Y/N")
             if (a == 'N') | (a == 'n') :
-                clisock.close()
+                clisock.send("Sorry, your connection has been declined :( ".encode("utf-8"))
+                clisock.close()                     #closing the clients connection if declined
                 break
 
             elif (a =='y') | (a == 'Y') :
@@ -105,20 +104,12 @@ class server():
                 self.clients.append(clisock)
                 #self.locations.append([addr[0],addr[1],count])
                 locations.append([addr[0],addr[1],count])
-                thread = threading.Thread(target = self.clienthandler, args = (clisock,)).start()
+                thread = threading.Thread(target = self.clienthandler, args = (clisock,)).start()       #creating and starting the thread to multithread the clienthandler so that multiple clients can send in data through the socket
                 
                        
             else :
                 print("Wrong input :(")
 
-                #inp = input("Enter commands if any. If nothing then just enter 'N' ")
-                #if inp == "/leave":
-                #    iprem = input("Enter the IP adress and port to be removed as a list")
-                # input will be ["123,23,43,22","12345"]
-
-                    
-
-            #serversock.close()
         '''except socket.error as txt:
             print("Could not start server thread :(")
             time.sleep(4)
@@ -127,15 +118,18 @@ class server():
 
 
 
+
     def broadcaster(self,message):
-        for c in self.clients:
+        for c in self.clients:                  #the broadcaster simply sends the message sent by one client to each and every client in the client array
             try:
                 c.send(message.encode("utf-8"))
 
             except socket.error as txt :
                 c.send('The message failed to send :( \n Try to send it again or close and reopen your connection!'.encode("utf-8"))
 
-        
+
+
+
 
 
     def clienthandler(self,ClientsSocket):                  #clisock is sent as ClientsSocket
@@ -144,12 +138,9 @@ class server():
         global serverport
         global count
         global locations
-        global coldict
-        #ClientsSocket.send('Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!'.encode("utf-8"))
-        #print("Clienthandler is run, from outsude while")
+        
         while True :
-            #try:
-            #print("clienthandler has run from inside while")
+        
             try:
                 data = ClientsSocket.recv(1024).decode("utf-8")
             except Exception as txt :
@@ -161,14 +152,13 @@ class server():
             #if not data :
             #    break
             #print("clienthadnler had recieved data")
-            if str(data) == '/leave':   # /leave is the keyword for the client to close his connection
+
+            if str(data) == '/leave':                           # /leave is the keyword for the client to close his connection
                 index = self.clients.index(ClientsSocket)
-                details = locations[index]                  #array containing ip and port
+                details = locations[index]                      # array containing ip and port
                 ClientsSocket.send("You will be removed in 5 seconds...".encode("utf-8"))
                 time.sleep(5)
 
-
-                pass
                     
             
             #formatting the data here as per the task!
@@ -176,16 +166,16 @@ class server():
             if "/colour" in str(data):      #changing colour
                 ind = str(data).index('/')
                 ind = ind + 8 # index of thr first letter of the actual colour
-                end = str(data).index(' ',ind)
-                print(ind)
-                print(end)
+                end = str(data).index(' ',ind)  # /colour 
+                #print(ind)
+                #print(end)
                 colo = str(data)[ind:end].upper()
                 
                 for keys in coldict :
                     if colo in keys:
                         #colo = str(colo)
                         coltype = coldict[str('C'+colo)]
-                        data = coldict[str('C'+colo)] + str(data) + coldict['CEND']
+                        data = coldict[str('C'+colo)] + str(data) + coldict['CEND']     #changing the colour
 
                 '''print(coltype)
                 coltype = coltype[1:]
