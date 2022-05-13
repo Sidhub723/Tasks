@@ -145,14 +145,21 @@ class server():
         global count
         global locations
         #ClientsSocket.send('Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!'.encode("utf-8"))
-        print("Clienthandler is run, from outsude while")
+        #print("Clienthandler is run, from outsude while")
         while True :
             #try:
-            print("clienthandler has run from inside while")
-            data = ClientsSocket.recv(1024).decode("utf-8")
+            #print("clienthandler has run from inside while")
+            try:
+                data = ClientsSocket.recv(1024).decode("utf-8")
+            except Exception as txt :
+                print("Oops, looks like the client has left!")
+                count -= 1
+                print(str(count)+ " clients remaining")
+                raise SystemExit(txt)
+
             #if not data :
             #    break
-            print("clienthadnler had recieved data")
+            #print("clienthadnler had recieved data")
             if str(data) == '/leave':   # /leave is the keyword for the client to close his connection
                 index = self.clients.index(ClientsSocket)
                 details = locations[index]                  #array containing ip and port

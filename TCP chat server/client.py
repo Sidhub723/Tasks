@@ -35,7 +35,8 @@ def connector():
         try:
             chats = clientsock.recv(1024).decode("utf-8")
             #chattxt = json.loads(chats)
-            print("Messages will be displayed now : \n \n \n")
+            if "Welcome to the chat" in chats :
+                print("Messages will be displayed now : \n")
             print(chats)
         except:
             clientsock.close()
@@ -48,13 +49,19 @@ def messaging():
     global clientsock
     global connected
     while True:
-        if connected == True:
-            texts = input("Chat here ---->")
-            clientsock.send(texts.encode("utf-8"))
+        try:
+            if connected == True:
+                texts = input("Chat here ---->")
+                clientsock.send(texts.encode("utf-8"))
+        except :
+            print("Exiting in 5 seconds")
+            time.sleep(5)
+            sys.exit()
 
 
 connectorThread = threading.Thread(target = connector).start()
 messagingThread = threading.Thread(target = messaging).start()
+
 
 
 
