@@ -71,7 +71,7 @@ class server():
         #self.locations = []
 
 
-    serversock = socket.socket()
+    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversock.bind((serverip,serverport))   # BINDING the socket to the ip of the server itself and a port on it so that all incoming connection recieved by the socket are redirected to the server itself
     serversock.listen(30)  # the socket is now listening on a port on the ip of the server
     print("Server is now active and listening!")
@@ -144,6 +144,7 @@ class server():
         global serverport
         global count
         global locations
+        global coldict
         #ClientsSocket.send('Welcome to the chat server! You should now be able to view messages from others, as well as post your own \n If you want to leave the chatroom then type /leave \n Enjoy your stay!'.encode("utf-8"))
         #print("Clienthandler is run, from outsude while")
         while True :
@@ -176,11 +177,21 @@ class server():
                 ind = str(data).index('/')
                 ind = ind + 8 # index of thr first letter of the actual colour
                 end = str(data).index(' ',ind)
-                colo = str(data)[ind,end].upper()
-                for keys in coldict.keys :
+                print(ind)
+                print(end)
+                colo = str(data)[ind:end].upper()
+                
+                for keys in coldict :
                     if colo in keys:
-                        coltype = coldict[keys]
-                data = coldict[coltype] + str(data) + coldict('CEND')
+                        #colo = str(colo)
+                        coltype = coldict[str('C'+colo)]
+                        data = coldict[str('C'+colo)] + str(data) + coldict['CEND']
+
+                '''print(coltype)
+                coltype = coltype[1:]
+                coltype = '\33' + coltype
+                print(coltype) '''
+                data = coldict[coltype] + str(data) + coldict['CEND']
 
             if "/leave" in str(data):
                 #self.broadcaster("A user has left")

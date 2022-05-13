@@ -23,7 +23,7 @@ def connector():
     global host,port,clientsock,connected
     try:
         
-        clientsock = socket.socket()
+        clientsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         clientsock = socket.create_connection((host,port))    # client creates a connection with host,port of server. client does not do 'bind' but does 'connect' with a port on the host
         print("You are being connected...")
         connected = True
@@ -51,7 +51,11 @@ def messaging():
     while True:
         try:
             if connected == True:
-                texts = input("Chat here ---->")
+                texts = input("")
+                if "/leave" in texts:
+                    clientsock.close()
+                    time.sleep(3)
+                    sys.exit()
                 clientsock.send(texts.encode("utf-8"))
         except :
             print("Exiting in 5 seconds")
